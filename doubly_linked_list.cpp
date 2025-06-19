@@ -1,126 +1,198 @@
 #include <iostream>
 using namespace std;
 
-class node {
+class Node {
 public:
     int data;
-    node *pre;
-    node *next;
+    Node* next;
+    Node* prev;
 
-    node(int data) {
+    Node(int data) {
         this->data = data;
-        this->pre = NULL;
-        this->next = NULL;
+        next = NULL;
+        prev = NULL;
     }
 };
 
 class DLL {
 public:
-    node *head;
-    node *tail;
+    Node* head;
 
     DLL() {
         head = NULL;
-        tail = NULL;
     }
 
     void insertAtBeginning(int value) {
-        node *newnode = new node(value);
+        Node* newNode = new Node(value);
+        if (head != NULL) {
+            newNode->next = head;
+            head->prev = newNode;
+        }
+        head = newNode;
+    }
+
+    void deletionAtBeginning() {
         if (head == NULL) {
-            head = tail = newnode;
+            cout << "List is empty\n";
             return;
         }
-        newnode->next = head;
-        head->pre = newnode;
-        head = newnode;
+        Node* temp = head;
+        head = head->next;
+        if (head != NULL)
+            head->prev = NULL;
+        delete temp;
     }
 
     void insertAtEnd(int value) {
-        node *newnode = new node(value);
-        if (tail == NULL) {
-            head = tail = newnode;
+        Node* newNode = new Node(value);
+        if (head == NULL) {
+            head = newNode;
             return;
         }
-        tail->next = newnode;
-        newnode->pre = tail;
-        tail = newnode;
-    }
-
-    void deleteAtBeginning() {
-        if (head == NULL) return;
-        if (head == tail) {
-            delete head;
-            head = tail = NULL;
-            return;
-        }
-        node *temp = head;
-        head = head->next;
-        head->pre = NULL;
-        delete temp;
-    }
-
-    void deleteAtEnd() {
-        if (tail == NULL) return;
-        if (head == tail) {
-            delete tail;
-            head = tail = NULL;
-            return;
-        }
-        node *temp = tail;
-        tail = tail->pre;
-        tail->next = NULL;
-        delete temp;
-    }
-
-    void printF() {
-        node *temp = head;
-        cout << "Forward: ";
-        while (temp != NULL) {
-            cout << temp->data << " -> ";
+        Node* temp = head;
+        while (temp->next != NULL) {
             temp = temp->next;
         }
-        cout << "NULL\n";
+        temp->next = newNode;
+        newNode->prev = temp;
     }
 
-    void printB() {
-        node *temp = tail;
-        cout << "Backward: ";
+    void deletionAtEnd() {
+        if (head == NULL) {
+            cout << "List is empty\n";
+            return;
+        }
+        if (head->next == NULL) {
+            delete head;
+            head = NULL;
+            return;
+        }
+        Node* temp = head;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->prev->next = NULL;
+        delete temp;
+    }
+
+    void insertBeforeValue(int target, int value) {
+        Node* temp = head;
+        while (temp != NULL && temp->data != target) {
+            temp = temp->next;
+        }
+
+        if (temp == NULL) {
+            cout << "Target value not found\n";
+            return;
+        }
+
+        Node* newNode = new Node(value);
+        newNode->next = temp;
+        newNode->prev = temp->prev;
+
+        if (temp->prev != NULL)
+            temp->prev->next = newNode;
+        else
+            head = newNode;
+
+        temp->prev = newNode;
+    }
+
+    void deleteBeforeValue(int target) {
+        Node* temp = head;
+
+        while (temp != NULL && temp->data != target) {
+            temp = temp->next;
+        }
+
+        if (temp == NULL || temp->prev == NULL) {
+            cout << "No node exists before the target\n";
+            return;
+        }
+
+        Node* delNode = temp->prev;
+
+        if (delNode->prev != NULL) {
+            delNode->prev->next = temp;
+            temp->prev = delNode->prev;
+        } else {
+            head = temp;
+            temp->prev = NULL;
+        }
+
+        delete delNode;
+    }
+
+    void insertAfterValue(int target, int value) {
+        Node* temp = head;
+
+        while (temp != NULL && temp->data != target) {
+            temp = temp->next;
+        }
+
+        if (temp == NULL) {
+            cout << "Target value not found\n";
+            return;
+        }
+
+        Node* newNode = new Node(value);
+        newNode->next = temp->next;
+        newNode->prev = temp;
+
+        if (temp->next != NULL)
+            temp->next->prev = newNode;
+
+        temp->next = newNode;
+    }
+
+    void deleteAfterValue(int target) {
+        Node* temp = head;
+
+        while (temp != NULL && temp->data != target) {
+            temp = temp->next;
+        }
+
+        if (temp == NULL || temp->next == NULL) {
+            cout << "Target value not found or no node exists after it\n";
+            return;
+        }
+
+        Node* delNode = temp->next;
+        temp->next = delNode->next;
+
+        if (delNode->next != NULL)
+            delNode->next->prev = temp;
+
+        delete delNode;
+    }
+
+    void print() {
+        Node* temp = head;
         while (temp != NULL) {
-            cout << temp->data << " <- ";
-            temp = temp->pre;
+            cout << temp->data << " <-> ";
+            temp = temp->next;
         }
         cout << "NULL\n";
     }
 };
 
 int main() {
-    system("CLS");
     DLL l;
     l.insertAtBeginning(10);
-    l.insertAtEnd(20);
-    l.insertAtEnd(-1);
-    
-    l.printF();
-    l.printB();
+    l.insertAtBeginning(20);
+    l.insertAtBeginning(30);
+    l.insertAtBeginning(40);
+    l.print();
 
-    l.deleteAtBeginning();
-    l.deleteAtEnd();
-    
-    l.printF();
-    l.printB();
-    
+    l.insertAtEnd(15);
+    l.print();
+
+    // l.deletionAtBeginning();
+    // l.deletionAtEnd();
+    // l.insertBeforeValue(20, 15);
+    // l.deleteBeforeValue(20);
+    // l.insertAfterValue(10, 35);
+    // l.deleteAfterValue(10);
+
     return 0;
 }
-
-
-// void insertAftergivenNode(int value, int data){
-//     node* temp=head;
-//     while (head!=NULL && temp+data!=value){
-//     }
-
-//     if (temp==NULL){
-//         Node* copy = temp->next;
-//         temp->next=newnode;
-//         newNode->next = copy;
-//     }
-// }
